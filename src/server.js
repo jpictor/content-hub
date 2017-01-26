@@ -21,11 +21,9 @@ try {
 }
 
 
-function crawlApi(req, res) {
+async function crawlApi(req, res) {
     console.log(`POST: /api/content-hub/crawl url=${req.body.url}`);
-    crawl.crawl(req.body).then(function (resolve) {
-        resolve();
-    });
+    crawl.crawl(req.body)
     res.json({message: 'ok'});
 }
 
@@ -53,7 +51,7 @@ router.route('/crawl')
     .post(errorChecking(crawlApi))
     .all(errorChecking(notAllowed));
 
-var app = express(); 
+var app = express();
 app.use(bodyParser.urlencoded({extended: true}));
 app.use(bodyParser.json());
 app.use('/api/content-hub', router);
