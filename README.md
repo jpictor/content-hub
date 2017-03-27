@@ -5,8 +5,10 @@ extracted content.
 ## Configuration
 This service is configured using environment variables.  The default values
 are put in the .env file.
+* PORT: Bind this service to port.
 * URL_EXTRACT_URL: URL to the [url-extract](https://github.com/jpictor/url-extract)
 service.
+* DATABASE_URL: The URL to the Postgres database.
 
 ## Development
 ```bash

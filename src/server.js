@@ -1,6 +1,7 @@
 import express from 'express'
 import bodyParser from 'body-parser'
 import { crawl } from './crawl'
+import db from './models'
 
 async function crawlApi (req, res) {
   console.log(`POST: /api/content-hub/crawl url=${req.body.url}`)
@@ -26,14 +27,17 @@ function notAllowed (req, res) {
 var router = express.Router()
 
 router.route('/crawl')
-    .post(errorChecking(crawlApi))
-    .all(errorChecking(notAllowed))
+  .post(errorChecking(crawlApi))
+  .all(errorChecking(notAllowed))
 
 var app = express()
+app.db = db
+
 app.use(bodyParser.urlencoded({extended: true}))
 app.use(bodyParser.json())
 app.use('/api/content-hub', router)
 
-var port = process.env.PORT || 2224
-app.listen(port)
-console.log(`Content-Hub Service started on port ${port}`)
+console.log(`Content-Hub Service started on port ${process.env.PORT}`)
+app.listen(process.env.PORT).on('error', err => {
+  console.error(`ERROR: ${err.message}`)
+})

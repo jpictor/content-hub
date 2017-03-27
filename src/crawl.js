@@ -1,15 +1,23 @@
 import { get } from 'lodash'
 import rp from 'request-promise'
+import db from './models'
 
 export async function crawl (crawlDoc) {
   console.log(`START-CRAWL: url=${crawlDoc.url}`)
   const infoDoc = await urlInfo(crawlDoc.url)
-  const resolvedUrl = get(infoDoc, 'url_info.resolved_url')
-  // const readability = get(infoDoc, 'html_extract.readability')
-  const title = get(infoDoc, 'card.title')
-  console.log(`CRAWL-COMPLETE: url=${crawlDoc.url} url=${resolvedUrl} title=${title}`)
-  // console.log(`CRAWL-CARD: ${JSON.stringify(infoDoc.card)}`)
-  console.log('')
+  const statusCode = get(infoDoc, 'html_extract.status_code')
+  if (statusCode === 200) {
+    const content = db.Content.build({
+      url: crawlDoc.url,
+      resolved_url: get(infoDoc, 'card.resolved_url'),
+      title: get(infoDoc, 'card.title'),
+      html: get(infoDoc, 'html_extract.readability'),
+      text: get(infoDoc, 'html_extract.text'),
+      metadata: get(infoDoc, 'card')
+    })
+    await content.save()
+    console.log(`CRAWL-COMPLETE: url=${content.url} url=${content.resolved_url} title=${content.title}`)
+  }
 }
 
 export async function urlInfo (url) {
