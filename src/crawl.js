@@ -1,23 +1,21 @@
 import { get } from 'lodash'
-const rp = require('request-promise')
-const rp_errors = require('request-promise/errors')
-const htmlToText = require('html-to-text')
+import rp from 'request-promise'
 
-export async function crawl (crawlDoc, configDoc) {
+export async function crawl (crawlDoc) {
   console.log(`START-CRAWL: url=${crawlDoc.url}`)
-  const infoDoc = await urlInfo(crawlDoc.url, configDoc)
+  const infoDoc = await urlInfo(crawlDoc.url)
   const resolvedUrl = get(infoDoc, 'url_info.resolved_url')
-  const readability = get(infoDoc, 'html_extract.readability')
+  // const readability = get(infoDoc, 'html_extract.readability')
   const title = get(infoDoc, 'card.title')
   console.log(`CRAWL-COMPLETE: url=${crawlDoc.url} url=${resolvedUrl} title=${title}`)
-    // console.log(`CRAWL-CARD: ${JSON.stringify(infoDoc.card)}`)
+  // console.log(`CRAWL-CARD: ${JSON.stringify(infoDoc.card)}`)
   console.log('')
 }
 
-export async function urlInfo (url, configDoc) {
+export async function urlInfo (url) {
   const options = {
     method: 'GET',
-    url: `http://10.0.0.152:8192/api/url-extract/all`,
+    url: `${process.env.URL_EXTRACT_URL}/api/url-extract/all`,
     qs: {
       url: url
     },

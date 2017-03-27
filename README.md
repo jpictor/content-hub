@@ -1,11 +1,9 @@
 Content Hub Service
 ---------------------
 
-Requires minimum NodeJS 6.1
+# Build
 
-Basic build:
-
-$ npm install -g babel-cli
+$ nvm use
 $ npm install
 $ npm run compile
 
@@ -16,4 +14,3 @@ $ npm start
 You can run it using babel-node for development:
 
 $ npm run dev
-
