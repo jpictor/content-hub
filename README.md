@@ -1,5 +1,7 @@
 Content Hub Service
 ---------------------
+This service is a REST API which crawls submitted URLs and stores the
+extracted content.
 
 # Build
 
