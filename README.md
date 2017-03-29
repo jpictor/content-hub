@@ -1,6 +1,7 @@
 # Content Hub Service
-This service is a REST API which crawls submitted URLs and stores the
-extracted content.
+A content ingestion service implementing a pipeline of scraping, tagging,
+and storing text content.  The [url-extract](https://github.com/jpictor/url-extract)
+is used to scrape HTML content given by URL.
 
 ## Configuration
 This service is configured using environment variables.  The default values
@@ -9,6 +10,13 @@ are put in the .env file.
 * URL_EXTRACT_URL: URL to the [url-extract](https://github.com/jpictor/url-extract)
 service.
 * DATABASE_URL: The URL to the Postgres database.
+
+## Database
+Postgres >= 9.5 is required.  Create the database by running:
+```bash
+$ createdb content_hub
+$ npm run db:migrate
+```
 
 ## Development
 ```bash
