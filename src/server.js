@@ -1,10 +1,13 @@
+import http from 'http'
 import express from 'express'
 import bodyParser from 'body-parser'
+import winston from 'winston'
+import expressWinston from 'express-winston'
+import epilogue from 'epilogue'
 import { crawl } from './crawl'
 import db from './models'
 
 async function crawlApi (req, res) {
-  console.log(`POST: /api/content-hub/crawl url=${req.body.url}`)
   crawl(req.body)
   res.json({message: 'ok'})
 }
@@ -24,20 +27,42 @@ function notAllowed (req, res) {
   res.status(405).json({error: 'method not allowed'})
 }
 
-var router = express.Router()
+const router = express.Router()
 
 router.route('/crawl')
   .post(errorChecking(crawlApi))
   .all(errorChecking(notAllowed))
 
-var app = express()
+const app = express()
 app.db = db
 
-app.use(bodyParser.urlencoded({extended: true}))
+app.use(expressWinston.logger({
+  transports: [
+    new winston.transports.Console({
+      colorize: true
+    })
+  ]
+}))
+
+app.use(bodyParser.urlencoded({extended: false}))
 app.use(bodyParser.json())
 app.use('/api/content-hub', router)
 
-console.log(`Content-Hub Service started on port ${process.env.PORT}`)
-app.listen(process.env.PORT).on('error', err => {
-  console.error(`ERROR: ${err.message}`)
+epilogue.initialize({
+  app: app,
+  sequelize: db.database
+})
+epilogue.resource({
+  model: db.Content,
+  endpoints: ['/api/content-hub/content', '/api/content-hub/content/:id'],
+  sort: {
+    default: '-created_at'
+  }
+})
+
+const server = http.createServer(app)
+
+winston.info(`Content-Hub Service started on port ${process.env.PORT}`)
+server.listen(process.env.PORT).on('error', err => {
+  winston.error(`ERROR: ${err.message}`)
 })

@@ -1,10 +1,13 @@
 import fs from 'fs'
 import path from 'path'
+import winston from 'winston'
 import Sequelize from 'sequelize'
 
 const basename = path.basename(module.filename)
 const db = {}
-const sequelize = new Sequelize(process.env.DATABASE_URL)
+const sequelize = new Sequelize(process.env.DATABASE_URL, {
+  logging: winston.debug
+})
 
 fs
   .readdirSync(__dirname)
@@ -22,4 +25,4 @@ Object.keys(db).forEach(function (modelName) {
   }
 })
 
-export default Object.assign({ sequelize, Sequelize }, db)
+export default Object.assign({ database: sequelize }, db)
