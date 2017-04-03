@@ -3,6 +3,7 @@ import rp from 'request-promise'
 import winston from 'winston'
 import validUrl from 'valid-url'
 import db from './models'
+import { nlpTagger } from './nlp'
 
 export async function crawl (crawlDoc) {
   const url = crawlDoc.url
@@ -16,16 +17,23 @@ export async function crawl (crawlDoc) {
 
   const infoDoc = await urlInfo(url)
   const statusCode = get(infoDoc, 'html_extract.status_code')
+  const text = get(infoDoc, 'html_extract.text')
+  const metadata = {
+    card: get(infoDoc, 'card'),
+    nlp: await nlpTagger(text)
+  }
+
   if (statusCode === 200 && infoDoc.card.title) {
     const content = db.Content.build({
       url: url,
       resolved_url: get(infoDoc, 'card.resolved_url'),
       title: get(infoDoc, 'card.title'),
       html: get(infoDoc, 'html_extract.readability'),
-      text: get(infoDoc, 'html_extract.text'),
-      metadata: get(infoDoc, 'card')
+      text: text,
+      metadata: metadata
     })
     await content.save()
+
     winston.info(`CRAWL-COMPLETE: url=${content.url} resolved-url=${content.resolved_url} title=${content.title}`)
   }
 }
