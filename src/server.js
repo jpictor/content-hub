@@ -1,5 +1,6 @@
 import http from 'http'
 import express from 'express'
+import cors from 'cors'
 import bodyParser from 'body-parser'
 import winston from 'winston'
 import expressWinston from 'express-winston'
@@ -8,19 +9,13 @@ import { crawl } from './crawl'
 import { nlpTagger } from './nlp'
 import db from './models'
 
-const tryText = `
-First documented in the 13th century, Berlin was the capital of the Kingdom of Prussia (1701–1918), the German Empire (1871–1918), the Weimar Republic (1919–33) and the Third Rei
-ch (1933–45). Berlin in the 1920s was the third largest municipality in the world. After World War II, the city became divided into East Berlin -- the capital of East Germany --
-and West Berlin, a West German exclave surrounded by the Berlin Wall from 1961–89. Following German reunification in 1990, the city regained its status as the capital of Germany,
- hosting 147 foreign embassies.`
-
 async function crawlApi (req, res) {
-  crawl(req.body)
+  await crawl(req.body)
   res.json({message: 'ok'})
 }
 
 async function nlpApi (req, res) {
-  const response = await nlpTagger(tryText)
+  const response = await nlpTagger(req.body)
   res.json(response)
 }
 
@@ -46,11 +41,12 @@ router.route('/crawl')
   .all(errorChecking(notAllowed))
 
 router.route('/nlp')
-  .get(errorChecking(nlpApi))
+  .post(errorChecking(nlpApi))
   .all(errorChecking(notAllowed))
 
 const app = express()
 app.db = db
+app.use(cors())
 
 app.use(expressWinston.logger({
   transports: [
